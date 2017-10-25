@@ -787,7 +787,37 @@ void setup()
   int error;
   uint8_t c;
   pinMode(8, OUTPUT);
-  Serial.begin(1152000);
+  SPI.setDataMode(SPI_MODE1);
+   SPI.setClockDivider(SPI_CLOCK_DIV64);
+   SPI.begin();
+
+   pinMode(chipSelectPin, OUTPUT);
+
+   pinMode(VCARDEN, OUTPUT);
+   pinMode(VLEDEN, OUTPUT);
+   pinMode(VUEXT1EN, OUTPUT);
+   pinMode(VUEXT2EN, OUTPUT);
+   pinMode(CS1, OUTPUT);
+   pinMode(CS2, OUTPUT);
+   pinMode(CSC, OUTPUT);
+   pinMode(DAC0, INPUT);
+   pinMode(DAC1, INPUT);
+   pinMode(DAC2, INPUT);
+   pinMode(CDET, INPUT);    // SD card detect
+   
+  
+  CS1_HIGH;
+  CS2_HIGH;
+  CSC_HIGH;
+   
+  digitalWrite(chipSelectPin, HIGH);
+  VLED_ON;
+  VUEXT1_OFF;
+  VUEXT2_ON;
+  VCARD_OFF;
+
+  //Set Charge Current acording to battery used
+  Set_Charge_Current_1A();
   Serial.begin(115200);
    while (Serial) { 
     }
@@ -826,7 +856,7 @@ void setup()
   MPU9150_write_reg (MPU9150_PWR_MGMT_1, 0);
   // LED 
    SPI.setDataMode(SPI_MODE1);
-     SPI.setClockDivider(SPI_CLOCK_DIV64);
+   SPI.setClockDivider(SPI_CLOCK_DIV64);
    SPI.begin();
 
    pinMode(chipSelectPin, OUTPUT);
@@ -1039,10 +1069,11 @@ void loop()
     readGyro();
     triggerlevel.up = 5400;  
     triggerlevel.down = 5400;
-    triggerlevel.left = 4300;
-    triggerlevel.right = 4300;    
-    triggerlevel.forward = 1627;
-    triggerlevel.backward = 1470;
+    triggerlevel.left = 2200;
+    triggerlevel.right = 2200;    
+    triggerlevel.forward = 2427;
+    triggerlevel.backward = 780;
+    
    if (accel_t_gyro.value.y_accel > triggerlevel.forward) //forward
     {
    VLED_ON;
@@ -1057,12 +1088,12 @@ void loop()
    drawPixel(5+cntr4,5);
    drawPixel(-1+cntr4,5);
    Transfer();
-   delay(17);
+   delay(22);
    vClear();
    VLED_OFF;
     }
    
- if (accel_t_gyro.value.y_accel < triggerlevel.backward) //backward
+ if (accel_t_gyro.value.x_accel < triggerlevel.backward)//backward
    {
    VLED_ON;
    cntr3++;                              //draw stop
@@ -1084,39 +1115,57 @@ void loop()
    drawPixel(1+cntr3,5);
    drawPixel(1+cntr3,3); 
    Transfer();
-   delay(37);
+   delay(22);
    vClear();
    VLED_OFF;
     }
  if (accel_t_gyro.value.z_gyro < -triggerlevel.left) //left
-    {
+   {
    VLED_ON;
-   MPU9150_write_reg (MPU9150_PWR_MGMT_1, 0);
-   SPI.setDataMode(SPI_MODE1);
-   SPI.setClockDivider(SPI_CLOCK_DIV64);
-   SPI.begin();
-   pinMode(chipSelectPin, OUTPUT);
-   vClear();
+   //MPU9150_write_reg (MPU9150_PWR_MGMT_1, 0);
+   //SPI.setDataMode(SPI_MODE1);
+   //SPI.setClockDivider(SPI_CLOCK_DIV64);
+   //SPI.begin();
+   //pinMode(chipSelectPin, OUTPUT);
+   //vClear();
    point=!point;
-   scrollString(l, point);
+   cntr++;
+   color=3;
+   if (cntr>43) cntr=0;
+   drawPixel(3+cntr,1);
+   drawPixel(3+cntr,8);
+   drawLine(-1+cntr,4,2+cntr,1);
+   drawLine(-2+cntr,4,2+cntr,8);
+   drawLine(-3+cntr,4,1+cntr,1);
+   drawLine(-3+cntr,4,1+cntr,8);
    Transfer();
-   delay(7);
+   delay(32);
    vClear();
    VLED_OFF;
     }
  if ((accel_t_gyro.value.z_gyro > triggerlevel.right))  //right
-    {
+   {
    VLED_ON;
-   MPU9150_write_reg (MPU9150_PWR_MGMT_1, 0);
-   SPI.setDataMode(SPI_MODE1);
-   SPI.setClockDivider(SPI_CLOCK_DIV64);
-   SPI.begin();
-   pinMode(chipSelectPin, OUTPUT);
-   vClear();
+   //MPU9150_write_reg (MPU9150_PWR_MGMT_1, 0);
+   //SPI.setDataMode(SPI_MODE1);
+   //SPI.setClockDivider(SPI_CLOCK_DIV64);
+   //SPI.begin();
+   //pinMode(chipSelectPin, OUTPUT);
+   //vClear();
    point=!point;
-   scrollString(r, point);
+   cntr2++;
+   color=3;
+   if (cntr2>63) cntr2=0;
+   drawPixel(1+cntr2,5);
+   drawPixel(0+cntr2,4);
+   drawPixel(0+cntr2,5);
+   drawLine(1+cntr2,4,-2+cntr2,1);
+   drawLine(1+cntr2,4,-2+cntr2,8);
+   drawLine(3+cntr2,4,-1+cntr2,1);
+   drawLine(3+cntr2,4,-1+cntr2,8);
+   //scrollString(r, point);
    Transfer();
-   delay(7);
+   delay(32);
    vClear();
    VLED_OFF;
    }
